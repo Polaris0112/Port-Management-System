@@ -1,0 +1,100 @@
+{% extends "management/base.html" %}
+{% load staticfiles %}
+{% block title %}创建主机{% endblock %}
+
+{% block content %}
+
+    <div class="container">
+        <div class="row">
+            <div class="col-md-6 col-md-offset-3 col-sm-10 col-sm-offset-1">
+                {% if state == 'success' %}
+                    <div class="well">
+                        <h2 class="text-success text-center">添加成功</h2>
+                    </div>
+                {% elif state == 'ip_hostname_exist' %}
+                    <div class="well">
+                        <h2 class="text-warning text-center">主机或者IP地址重复</h2>
+                    </div>
+                {% elif state == 'illegal_ipaddress' %}
+                    <div class="well">
+                        <h2 class="text-warning text-center">非法IP地址</h2>
+                    </div>
+                {% elif state == 'illegal_hostname' %}
+                    <div class="well">
+                        <h2 class="text-warning text-center">非法主机名</h2>
+                    </div>
+                {% endif %}
+                <form method="POST" role="form" class="form-horizontal">
+                    {% csrf_token %}
+                    <h1 class="form-signin-heading text-center">创建主机</h1>
+
+                    <div class="form-group">
+                        <label for="id_hostname" class="col-md-3 control-label">主机名：</label>
+                        <div class="col-md-9">
+			    {% if hostname == None %}
+                                <input type="text" class="form-control" id="id_hostname" required name="hostname">
+                {% else %}
+                                <input type="text" class="form-control" id="id_hostname" required name="hostname" value={{ hostname }}>
+			    {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="id_sshname" class="col-md-3 control-label">ssh名：</label>
+                        <div class="col-md-9">
+                {% if sshname == None %}
+                                <input type="text" class="form-control" id="id_sshname" required name="sshname">
+                {% else %}
+                                <input type="text" class="form-control" id="id_sshname" required name="sshname" value={{ sshname }}>
+                {% endif %}
+                        </div>
+                    </div>
+
+
+                    <div class="form-group">
+                        <label for="id_ipaddr" class="col-md-3 control-label">IP地址（公网）：</label>
+                        <div class="col-md-9">
+            		    {% if eipaddr == None %} 
+                            	<input type="text" class="form-control" required name="eipaddr" id="id_eipaddr">
+          		        {% else %}
+                                <input type="text" class="form-control" required name="eipaddr" id="id_eipaddr" value={{ eipaddr }}>
+                        {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="id_ipaddr" class="col-md-3 control-label">IP地址（内网）：</label>
+                        <div class="col-md-9">
+                        {% if iipaddr == None %}
+                                <input type="text" class="form-control" required name="iipaddr" id="id_iipaddr">
+                        {% else %}
+                                <input type="text" class="form-control" required name="iipaddr" id="id_iipaddr" value={{ iipaddr }}>
+                        {% endif %}
+                        </div>
+                    </div>
+
+
+                <!--    <div class="form-group">
+                        <label for="id_port" class="col-md-3 control-label">选择主机类别：</label>
+                        <div class="col-md-9">
+			    <select name="type" class="form-control">
+                                {% for tp in tp_list %}
+				<option  class="form-control" value={{tp.tp_name}}>{{tp.tp_name}}-开放端口：{{ tp.port_list }}</option>
+                                {% endfor %}
+			    </select>
+                        </div>
+                    </div>-->
+
+
+                    <div class="form-group">
+                        <div class="col-md-4 col-md-offset-4">
+                            <button class="btn btn btn-primary btn-block btn-lg" type="submit">提交</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
+{% endblock %}

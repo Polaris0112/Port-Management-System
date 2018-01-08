@@ -1,0 +1,125 @@
+{% extends "management/base.html" %}
+{% load staticfiles %}
+{% block title %}添加信任端口{% endblock %}
+
+{% block content %}
+
+    <div class="container">
+        <div class="row">
+            <div class="col-md-6 col-md-offset-3 col-sm-10 col-sm-offset-1">
+                {% if state == 'success' %}
+                    <div class="well">
+                        <h2 class="text-success text-center">添加成功</h2>
+                    </div>
+                {% elif state == 'port_exist' %}
+                    <div class="well">
+                        <h2 class="text-warning text-center">端口重复</h2>
+                    </div>
+                {% elif state == 'illegal_port' %}
+                    <div class="well">
+                        <h2 class="text-warning text-center">非法端口格式</h2>
+                    </div>
+                {% elif state == 'illegal_ipaddress' %}
+                    <div class="well">
+                        <h2 class="text-warning text-center">非法IP地址</h2>
+                    </div>
+                {% elif state == 'illegal_subnet' %}
+                    <div class="well">
+                        <h2 class="text-warning text-center">非法IP格式或者网段格式</h2>
+                    </div>
+
+                {% elif state == 'some_add_port_fail' %}
+                    <div class="well">
+                        <h2 class="text-warning text-center">部分端口重复：
+                        {% for port in exists_port %}
+                            {{ port }}，
+                        {% endfor %}
+                        </h2>
+
+                    </div>
+
+                {% elif state == 'not_match' %}
+                    <div class="well">
+                        <h2 class="text-warning text-center">IP地址与主机名不一致</h2>
+		    </div>
+                {% endif %}
+                <form method="POST" role="form" class="form-horizontal">
+                    {% csrf_token %}
+                    <h1 class="form-signin-heading text-center">添加端口</h1>
+
+                    <div class="form-group">
+                        <label for="id_hostname" class="col-md-3 control-label">主机：</label>
+                        <div class="col-md-9">
+                            <select name="ipaddr"  class="form-control">
+ 			    {% for host in host_list %}
+                   {% if host.ipaddr == query_ipaddr %}
+			           <option selected  class="form-control" value={{ host.ipaddr}}>{{ host.ssh_name }} - {{ host.ipaddr }}</option>
+                   {% else %}
+			           <option class="form-control" value={{ host.ipaddr}}>{{ host.ssh_name }} - {{ host.ipaddr }}</option>
+                   {% endif %}
+			    {% endfor %}
+			    </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="id_port" class="col-md-3 control-label">开放信任端口：</label>
+                        <div class="col-md-9">
+                            {% if port == None %}
+                                <input type="text" class="form-control" required name="port" id="id_port">
+                            {% else %}
+                                <input type="text" class="form-control" required name="port" id="id_port" value={{ port }}>
+                            {% endif %}
+                            <span class="help-block">支持输入:</br> 
+                             1、单个端口号(0代表全部端口,用于添加内网互通之类的情况)</br>
+                             2、port1,port2,...,portX</br>
+                             3、port1~portX (1~X的范围不超过100个)</br>
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="id_protocol" class="col-md-3 control-label">端口协议：</label>
+                        <div class="col-md-9">
+                             <select name="protocol"  class="form-control" >
+                                  <option  class="form-control" value=TCP>TCP</option>
+                                  <option  class="form-control" value=UDP>UDP</option>
+                                  <option  class="form-control" value=TCPUDP>TCP/UDP</option>
+                             </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="id_acceptip" class="col-md-3 control-label">指定源IP(可选)：</label>
+                        <div class="col-md-9">
+                            {% if acceptip == "0.0.0.0" %}
+                                <input type="text" class="form-control" name="acceptip" placeholder="0.0.0.0" id="id_acceptip">
+                            {% else %}
+                                <input type="text" class="form-control" name="acceptip" id="id_acceptip">
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="id_usage" class="col-md-3 control-label">用途：</label>
+                        <div class="col-md-9">
+                            {% if usage == None %}
+                                <input type="text" class="form-control" required name="usage" id="id_usage">
+                            {% else %}
+                                <input type="text" class="form-control" required name="usage" id="id_usage" value={{ usage }}>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="col-md-4 col-md-offset-4">
+                            <button class="btn btn btn-primary btn-block btn-lg" type="submit">提交</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
+{% endblock %}

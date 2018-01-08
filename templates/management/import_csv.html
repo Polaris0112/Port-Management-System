@@ -1,0 +1,65 @@
+{% extends "management/base.html" %}
+{% load staticfiles %}
+{% block title %}端口管理系统{% endblock %}
+
+{% block content %}
+
+    <div class="container">
+        <div class="row"  align="center">
+<!--            <div class="col-md-8 col-md-offset-2 well"> -->
+                {% if state == 'upload_success' %}
+                   <div class="well">
+                        <h2 class="text-success text-center">导入成功</h2>
+                    </div>
+
+                    <script language="JavaScript1.2" type="text/javascript"> 
+                    function delayURL(url) { 
+                    var delay=document.getElementById("time").innerHTML; 
+                    if(delay>0){ 
+                        delay--; 
+                        document.getElementById("time").innerHTML=delay; 
+                    }else{ 
+                    window.top.location.href=url; 
+                    } 
+                    setTimeout("delayURL('" + url + "')", 1000); 
+                    } 
+                   </script> 
+                   <span id="time" style="font-size:20px">4</span> 
+                   秒钟之后自动跳转，如果不跳转，请点击下面链接 
+                   <a href="{% url 'view_host'%}">主机列表</a> 
+                   <script type="text/javascript"> 
+                   delayURL("http://192.168.0.23:8080/view_host"); 
+                   </script> 
+                {% elif state == 'file_format_error' %}
+                    <div class="well">
+                        <h2 class="text-warning text-center">文件格式错误</h2>
+                    </div>
+                {% elif state == 'file_content_error' %}
+                    <div class="well">
+                        <h2 class="text-warning text-center">文件内容错误</h2>
+                    </div>
+                {% elif state == 'ip_or_hostname_exists' %}
+                    <div class="well">
+                        <h2 class="text-warning text-center">IP或主机名已存在</h2>
+                    </div>
+                {% elif state == 'unknown_error' %}
+                    <div class="well">
+                        <h2 class="text-warning text-center">未知错误{{ status }}</h2>
+                    </div>
+                {% elif state == 'unknown_request' %}
+                    <div class="well">
+                        <h2 class="text-warning text-center">未知请求{{ status }}</h2>
+                    </div>
+
+                {% endif %}
+                <form enctype="multipart/form-data" action="{% url 'import_csv'%}" name="test" method="post">
+                 {% csrf_token %}  
+                    <input id="file" class="btn btn-lg"  type="file" name="file" multiple="" />
+                 	<input id="signUpSubmit" class="btn btn-lg btn-success"  type="submit" value="提交">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                 	<a href="{% url 'export_csv'%}?sshname=default"   class="btn btn-lg btn-success">下载模板</a>
+                </form>
+          <!--  </div> -->
+        </div>
+    </div>
+
+{% endblock %}

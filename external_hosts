@@ -1,0 +1,5 @@
+[test]
+test0 ansible_ssh_host=xxx.xxx.xxx.xxx
+test1 ansible_ssh_host=xxx.xxx.xxx.xxx
+test2 ansible_ssh_host=xxx.xxx.xxx.xxx
+

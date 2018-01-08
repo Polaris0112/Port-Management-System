@@ -1,0 +1,281 @@
+{% extends "management/base.html" %}
+{% load staticfiles %}
+{% block title %}查看主机{% endblock %}
+
+
+
+{% block content %}
+{% if state == 'delete_success' %}
+
+<div class="alert alert-success alert-dismissable" style=" text-align:center;">
+        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">
+                &times;
+        </button>
+        删除主机成功！
+
+</div>
+
+{% elif state == 'delete_fail' %}
+<div class="alert alert-danger alert-dismissable" style=" text-align:center;">
+        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">
+                &times;
+        </button>
+        删除失败！请进行一些更改然后再重试。
+</div>
+{% elif state == 'modify_success' %}
+<div class="alert alert-success alert-dismissable" style=" text-align:center;">
+        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">
+                &times;
+        </button>
+        修改成功！
+</div>
+{% elif state == 'modify_fail' %}
+<div class="alert alert-danger alert-dismissable" style=" text-align:center;">
+        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">
+                &times;
+        </button>
+        修改失败！请进行一些更改然后再重试。
+</div>
+{% elif state == 'sshname_exists' %}
+<div class="alert alert-danger alert-dismissable" style=" text-align:center;">
+        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">
+                &times;
+        </button>
+        修改失败！请对ssh名一些更改然后再重试。
+</div>
+
+{% elif state == 'ip_formate_fail' %}          
+<div class="alert alert-danger alert-dismissable" style=" text-align:center;">
+        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">
+                &times;
+        </button>
+        修改失败！填写IP时需要按照[公网/内网]这样的格式。
+</div>
+{% elif state == None %}
+<div> </div>
+{% else %}
+<div class="alert alert-danger alert-dismissable" style=" text-align:center;">
+        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">
+                &times;
+        </button>
+        未知错误。{{ state }}
+</div>
+{% endif %}
+
+
+    <div class="container-l">
+        <div class="row">
+            <div class="col-md-10 col-md-offset-1">
+                <div class="col-md-3 col-md-offset-0">
+					<form role="form" method="post" name="search_form">
+						{% csrf_token %}
+						<input type="search" class="form-control" name="keyword" 
+                                   placeholder="Enter keywords to search" id="id_search_input">
+                       
+                    </form> 
+                </div>
+                <div class="col-md-8 col-md-offset-10">
+                    <a class="btn btn-success btn-sm" href="{% url 'import_csv' %}">导入主机</a>
+                    &nbsp;&nbsp;
+                    <a class="btn btn-success btn-sm" href="{% url 'add_host' %}">添加主机</a>
+                </div>
+
+
+        <!--        <form method="POST" enctype="multipart/form-data" name="checkbox">-->
+                <table id="host_list" class="table table-hover">
+
+				<script type="text/javascript">
+		        var isCheckAll = false;  
+     		    function swapCheck() {  
+		            if (isCheckAll) {  
+        		        $("input[type='checkbox']").each(function() {  
+		                    this.checked = false;  
+        		        });  
+		                isCheckAll = false;  
+		            } else {  
+        		        $("input[type='checkbox']").each(function() {  
+                		    this.checked = true;  
+ 		               });  
+        		        isCheckAll = true;  
+		            }  
+        		}  
+				</script>
+
+
+                    <thead>
+                    <tr>
+                        <th><input type="checkbox" id="SelectAll"  value="全选" onclick="swapCheck();"/></th>
+                        <th>#</th>
+                        <th>主机名</th>
+                        <th>ssh名</th>
+                        <th>IP地址（公网/内网）</th>
+                        <th>导出csv</th>
+                        <th>查看脚本</th>
+                        <th>操  作</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for ipaddr in ipaddr_list %}
+                       <tr>
+                            <td><input type="checkbox" name="subcheck"  value="{{ ipaddr.ipaddr }}"/> </td>
+                            <td><span style="vertical-align: middle;font-size:17px">{{ forloop.counter }}</span></td>
+                            <td><a href="{% url 'view_port'%}?ipaddr={{ ipaddr.ipaddr }}" style="vertical-align: middle;font-size:17px">{{ ipaddr.hostname }}</a></td>
+                            <td><a href="{% url 'view_port'%}?ipaddr={{ ipaddr.ipaddr }}" style="vertical-align: middle;font-size:17px">{{ ipaddr.ssh_name }}</a></td>
+                            <td><span style="vertical-align: middle;font-size:17px">{{ ipaddr.ipaddr }}</span></td>
+                            <td><a href="{% url 'export_csv'%}?sshname={{ ipaddr.ssh_name }}" class="btn btn-success">导出{{ ipaddr.ssh_name }}</a></td>
+        		    <td><button class="btn btn-primary" data-toggle="modal" data-target="#check_iptables{{ forloop.counter }}">查看iptables</button></td>
+			    {% if user.myuser.permission > 2 %}
+                            <td><button class="btn btn-warning btn-sm" data-toggle="modal" data-target="#modify_host_modal{{ ipaddr.ssh_name }}">修改</button>&nbsp;&nbsp;&nbsp;
+                            <button class="btn btn-danger btn-sm" data-toggle="modal" data-target="#delete_host_modal{{ ipaddr.ssh_name }}">删除</button></td>
+                            {% endif %}
+                            <div class="modal fade bs-example-modal-lg" id="modify_host_modal{{ ipaddr.ssh_name }}" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"  aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <form method="POST" role="form" enctype="multipart/form-data">
+                                        {% csrf_token %}
+                                            <div class="modal-header">
+			                    			<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                                                <h4 class="modal-title" id="modify_chosen_port">修改主机{{ ipaddr.ssh_name }}---{{ ipaddr.ipaddr }}</h4>
+                                            </div>
+                                            <div class="form-group modal-body">
+                                                <label >主机名：</label>
+                                                <input type="text" style='border:none;border-bottom:black solid 1px;font-size:18px' name="hostname" id="id_hostname" value={{ ipaddr.hostname }}>
+                                            </div>
+                                            <div class="modal-body">
+                                                <label>ssh名：</label>
+                                                <input style="border:none;border-bottom:black solid 1px;font-size:18px" name="sshname" id="id_sshname" value={{ ipaddr.ssh_name }}>
+                                            </div>
+
+                                            <div class="form-group modal-body">
+                                                <label>IP地址(公网/内网)：</label>
+                                                <input type="text"  style='border:none;border-bottom:black solid 1px;font-size:18px' name="ipaddr" id="id_ipaddr" value={{ ipaddr.ipaddr }}>
+                                            </div>
+                                            <!--<div class="form-group modal-body">
+                                                <div class="col-md-9">-->
+                                                    <input type="hidden"  name="originip" id="id_originip" value={{ ipaddr.ipaddr }}>
+                                            <!--    </div>
+                                            </div>-->
+
+
+                                            <div class="form-group modal-body">
+                                            </div>
+                                             <div class="modal-footer">
+                                                 <input  type="button" class="btn btn-default btn-sm" data-dismiss="modal" value="关闭">
+                                                 <input  type="submit" name="modify" href="{% url 'view_host' %}" class="btn btn-warning btn-sm" value="修改">
+                                             </div>
+                                         </form>
+                                     </div>
+                                 </div><!-- /.modal-content -->
+                            </div><!-- /.modal -->
+
+
+                            <div class="modal fade" id="delete_host_modal{{ ipaddr.ssh_name }}" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <form  method="POST" role="form" class="form-horizontal" enctype="multipart/form-data">
+                                        {% csrf_token %}
+                                            <div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                                                <h4 class="modal-title" id="delete_chosen_host">删除主机{{ ipaddr.ssh_name }}-{{ ipaddr.ipaddr }}</h4>
+                                            </div>
+                                            <div class="form-group modal-body">
+                                                <label class="col-md-3 control-label">主机名：</label>
+                                                <div class="col-md-9">
+                                                    <input type="text"  style="border-style:none;font-size:18px" readonly name="hostname" id="id_hostname" value={{ ipaddr.hostname }}>
+                                                </div>
+                                            </div>
+                                            <div class="form-group modal-body">
+                                                <label class="col-md-3 control-label">IP地址：</label>
+                                                <div class="col-md-9">
+                                                    <input type="text"  style="border-style:none;font-size:18px" readonly name="ipaddr" id="id_ipaddr" value={{ ipaddr.ipaddr }}>
+                                                </div>
+                                            </div>
+                                            <div class="form-group modal-body">
+                                                <label class="col-md-3 control-label">ssh名：</label>
+                                                <div class="col-md-9">
+                                                    <input type="text"  style="border-style:none;font-size:18px" readonly name="sshname" id="id_sshname" value={{ ipaddr.ssh_name }}>
+                                                </div>
+                                            </div>
+
+                                             <div class="modal-footer">
+                                                 <input  type="button" class="btn btn-default btn-sm" data-dismiss="modal" value="关闭">
+                                                 <input  type="submit" name="delete" href="{% url 'view_host' %}" class="btn btn-danger btn-sm" value="删除">
+                                             </div>
+                                         </form>
+                                     </div>
+                                 </div><!-- /.modal-content -->
+                            </div><!-- /.modal -->
+
+
+                                <div class="modal fade" id="check_iptables{{ forloop.counter }}" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                                                    <h4 class="modal-title" id="modify_chosen_port">查看{{ ipaddr.hostname }}的防火墙脚本</h4>
+                                                </div>
+
+						<script type="text/javascript"> 
+						function copyUrl2() 
+						{ 
+							var Url2=document.getElementById("bash"); 
+							Url2.select(); // 选择对象 
+							document.execCommand("Copy"); // 执行浏览器复制命令 
+							alert("已复制好，可贴粘。"); 
+						} 
+						</script> 
+
+                                                <div class="form-group modal-body"> 
+                                                 主机名：<input type="text"  style="border-style:none;font-size:18px" readonly name="hostname" id="id_hostname" value={{ ipaddr.hostname }}>
+                                      </br>IP地址：<input type="text"  style="border-style:none;width:70%;font-size:18px" readonly name="ipaddr" id="id_ipaddr" value={{ ipaddr.ipaddr }}>
+      						    <textarea  id="bash" style='border: 1px solid #94BBE2;width:100%;height:500px;'  >{{ ipaddr.iptables }}</textarea>
+                                                </div>
+
+                                             <div class="modal-footer">
+                                                 <input  type="button" class="btn btn-default btn-sm" data-dismiss="modal" value="关闭">
+                                                 <input type="button" onClick="copyUrl2()" class="btn btn-primary btn-sm" value="点击复制代码" />
+                                             </div>
+                                         </div>
+                                     </div><!-- /.modal-content -->
+                                </div><!-- /.modal -->
+
+
+
+		       </tr>
+                    {% empty %}
+                       <tr>
+                            <td>暂无主机</td>
+                       </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+                <div class="col-md-8 col-md-offset-10">
+                    <input name="delete_many" class="btn btn-danger btn-sm" type="submit" value="批量删除">
+                </div>
+             <!--   </form>-->
+                <nav>
+
+
+                    <ul class="pager">
+                        {% if ipaddr_list.has_previous %}
+                            <li class="previous"><a
+                                    href="?id={{ query_ipaddr }}&page={{ ipaddr_list.previous_page_number }}">上一页</a>
+                            </li>
+                        {% else %}
+                            <li class="previous disabled"><a href="#">上一页</a></li>
+                        {% endif %}
+                        第 {{ ipaddr_list.number }} / {{ ipaddr_list.paginator.num_pages }}页
+                        {% if ipaddr_list.has_next %}
+                            <li class="next"><a
+                                    href="?typ={{ query_ipaddr }}&page={{ ipaddr_list.next_page_number }}">下一页</a>
+                            </li>
+                        {% else %}
+                            <li class="next disabled"><a href="#">下一页</a></li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

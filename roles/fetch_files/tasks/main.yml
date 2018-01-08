@@ -1,0 +1,13 @@
+- name: Copy grap port script
+  copy: src="grap_port.sh" dest=/tmp/grap_port.sh mode=0755  owner=root group=root
+
+- name: Garp port data
+  shell: sh /tmp/grap_port.sh
+
+- name: Fetch port data from remote nodes 
+  fetch:
+    src: "/tmp/grap_data.txt"
+    dest: "{ pwd }/port_data/"
+
+- name: Remove left script 
+  shell: rm -f /tmp/grap_port.sh; rm -f /tmp/grap_data.txt 

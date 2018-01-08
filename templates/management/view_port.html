@@ -1,0 +1,267 @@
+{% extends "management/base.html" %}
+{% load staticfiles %}
+{% block title %}查看端口{% endblock %}
+
+{% block content %}
+{% if state == 'delete_success' %}
+<div class="alert alert-success alert-dismissable" style=" text-align:center;">
+	<button type="button" class="close" data-dismiss="alert" aria-hidden="true">
+                &times;
+        </button>
+        禁用成功！
+</div>
+{% elif state == 'delete_fail' %}
+<div class="alert alert-danger alert-dismissable" style=" text-align:center;">
+        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">
+                &times;
+        </button>
+        禁用失败！请进行一些更改然后再重试。
+</div>
+{% elif state == 'illegal_subnet' %}
+<div class="alert alert-danger alert-dismissable" style=" text-align:center;">
+        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">
+                &times;
+        </button>
+        修改失败！非法网段/IP格式。
+</div>
+{% elif state == 'modify_success' %}
+<div class="alert alert-success alert-dismissable" style=" text-align:center;">
+        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">
+                &times;
+        </button>
+        修改成功！
+</div>
+{% elif state == 'modify_fail' %}
+<div class="alert alert-danger alert-dismissable" style=" text-align:center;">
+        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">
+                &times;
+        </button>
+        修改失败！请进行一些更改然后再重试。
+</div>
+{% elif state == 'port_exist' %}
+<div class="alert alert-warning alert-dismissable" style=" text-align:center;">
+        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">
+                &times;
+        </button>
+        端口已存在！请进行一些更改然后再重试。
+</div>
+{% elif state == None %}
+<div> </div>
+{% else %}
+<div class="alert alert-danger alert-dismissable" style=" text-align:center;">
+        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">
+                &times;
+        </button>
+        未知错误。{{ state }}
+</div>
+{% endif %}
+
+    <div class="container-l">
+        <div class="row">
+            <div class="col-md-10 col-md-offset-1">
+                <div class="col-md-3">
+                    <div class="leftMenu">
+			            <ul style="width:100%;height:700px;overflow:scroll">
+                            <a href="{% url 'view_port' %}" class="list-group-item" id="id_ipaddr_all">全部端口</a>
+                        {% for ipaddr in ipaddr_list %}
+                            {% if ipaddr.ipaddr == query_ipaddr %}
+                                <a href="{% url 'view_port' %}?ipaddr={{ ipaddr.ipaddr }}" class="list-group-item active" id="id_ipaddr_{{ ipaddr.ipaddr }}">{{ ipaddr.ssh_name }}---{{ ipaddr.ipaddr }}</a>
+                            {% else %}
+                                <a href="{% url 'view_port' %}?ipaddr={{ ipaddr.ipaddr }}" class="list-group-item" id="id_ipaddr_{{ ipaddr.ipaddr }}">{{ ipaddr.ssh_name }}---{{ ipaddr.ipaddr }}</a>
+                            {% endif %}
+                        {% endfor %}
+                        </ul>
+                    </div>
+                    <script type="text/javascript">
+                        $('#id_ipaddr_{{ query_ipaddr }}').addClass("active");
+                    </script>
+                </div>
+                <div class="col-md-9 col-md-offset">
+                    <div class="col-md-4 col-md-offset-11">
+                    {% if query_ipaddr == 'all' %}
+    		            <a class="btn btn-success btn-sm" href="{% url 'add_port' %}">添加端口</a>
+                    {% else %}
+    		            <a class="btn btn-success btn-sm" href="{% url 'add_port' %}?selectd_ipaddr={{ query_ipaddr }}">添加端口</a>
+                    {% endif %}
+                        <!--<form role="form" method="post" hostname="search_form">
+                            {% csrf_token %}
+                            <input type="search" class="form-control" name="keyword"
+                                   placeholder="Enter keywords to search" id="id_search_input" onkeyup="key_up()"
+                                   autofocus>
+                        </form>-->
+                    </div>
+
+                    <table class="table table-hover">
+                        <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>ssh名</th>
+                            <th>IP地址（公网/内网）</th>
+                            <th>端口号</th>
+                            <th>端口协议</th>
+                            <th>指定源IP</th>
+                            <th>用途</th>
+                            <th>操  作</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for port in port_list %}
+                            <tr>
+                                <td><span style="vertical-align: middle;font-size:17px">{{ forloop.counter }}</span></td>
+                                <td><span style="vertical-align: middle;font-size:17px">{{ port.ssh_name }}</span></td>
+                                <td><span style="vertical-align: middle;font-size:17px">{{ port.ipaddr }}</span></td>
+                                <td><span style="vertical-align: middle;font-size:17px">{{ port.port }}</span></td>
+                                {% if port.protocol == 'TCPUDP' %}
+                                    <td><span style="vertical-align: middle;font-size:17px">TCP/UDP</span></td>
+                                {% else %}
+                                    <td><span style="vertical-align: middle;font-size:17px">{{ port.protocol }}</span></td>
+                                {% endif %}
+                                <td width="22%" style="word-break:break-all">
+                                <span style="font-size:17px">{{ port.acceptip }}</span>
+   								</td>
+                                <td><span style="vertical-align: middle;font-size:17px">{{ port.usage }}</span></td>
+                                {% if user.myuser.permission > 2 %}
+                                    <td><button class="btn btn-warning btn-sm" data-toggle="modal" data-target="#modify_port_modal{{ forloop.counter }}">修改</button>&nbsp;&nbsp;&nbsp;
+                                    <button class="btn btn-danger btn-sm" data-toggle="modal" data-target="#delete_port_modal{{ forloop.counter }}">禁用</button></td>
+                                {% endif %}
+
+                                <div class="modal fade" id="modify_port_modal{{ forloop.counter }}" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <form method="POST" role="form" class="form-horizontal" enctype="multipart/form-data">
+                                            {% csrf_token %}
+                                                <div class="modal-header">
+                                                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                                                    <h4 class="modal-title" id="modify_chosen_port">修改{{ port.ipaddr }}的{{ port.port }}端口</h4>
+                                                </div>
+                                                <div class="form-group  modal-body">
+                                                    <label class="col-md-3 control-label">IP地址：</label>
+                                                    <div class="col-md-9">
+                                                        <input type="text"  style="border-style:none;font-size:18px" readonly name="ipaddr" id="id_ipaddr" value={{ port.ipaddr }}>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group  modal-body">
+                                                    <label class="col-md-3 control-label">端口号：</label>
+                                                    <div class="col-md-9">
+                                                        <input type="text"  style="font-size:18px" name="port" id="id_port" placeholder={{ port.port }}>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group  modal-body">
+                                                    <label class="col-md-3 control-label">端口协议：</label>
+                                                    <div class="col-md-3">
+                                                        <select name="protocol" class="form-control" >
+                                                        {% if port.protocol == 'TCP' %}
+                                                            <option selected value="TCP">TCP</option>
+                                                            <option  value="UDP">UDP</option>
+                                                            <option  value="TCPUDP">TPC/UDP</option>
+                                                        {% elif port.protocol == 'UDP' %}
+                                                            <option  value="TCP">TCP</option>
+                                                            <option  selected value="UDP">UDP</option>
+                                                            <option  value="TCPUDP">TPC/UDP</option>
+                                                        {% else %}
+                                                            <option value="TCP">TCP</option>
+                                                            <option value="UDP">UDP</option>
+                                                            <option selected value="TCPUDP">TPC/UDP</option>
+                                                        {% endif %}
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group  modal-body">
+                                                    <label class="col-md-3 control-label">指定源IP：</label>
+                                                    <div class="col-md-9">
+                                                        <input type="text"  style="font-size:18px" name="acceptip" id="id_acceptip" placeholder={{ port.acceptip }}>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group  modal-body">
+                                                    <label class="col-md-3 control-label">用途：</label>
+                                                    <div class="col-md-9">
+                                                        <input type="text"  style="font-size:18px" name="usage" id="id_usage" placeholder={{ port.usage }}>
+                                                    </div>
+                                                    <input type="hidden" name="record_id" id="id_record_id" value={{ port.record_id }}>
+                                                </div>
+                                             <div class="modal-footer">
+                                                 <input  type="button" class="btn btn-default btn-sm" data-dismiss="modal" value="关闭">
+                                                 <input  type="submit" name="modify" class="btn btn-warning btn-sm" value="修改">
+                                             </div>
+                                         </form>
+                                         </div>
+                                     </div><!-- /.modal-content -->
+                                </div><!-- /.modal -->
+
+                                <div class="modal fade" id="delete_port_modal{{ forloop.counter }}" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" >
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <form method="POST" role="form" class="form-horizontal" enctype="multipart/form-data">
+                                            {% csrf_token %}
+                                                <div class="modal-header">
+                                                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                                                    <h4 class="modal-title" id="delete_chosen_port">禁用{{ port.ipaddr }}的{{ port.port }}端口</h4>
+                                                </div>
+                                                <div class="form-group  modal-body">
+                                                    <label class="col-md-3 control-label">IP地址：</label>
+                                                    <div class="col-md-9">
+                                                        <input type="text"  style="border-style:none;font-size:18px" readonly name="ipaddr" id="id_ipaddr" value={{ port.ipaddr }}>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group  modal-body">
+                                                    <label class="col-md-3 control-label">端口号：</label>
+                                                    <div class="col-md-9">
+                                                        <input type="text"  style="border-style:none;font-size:18px" readonly name="port" id="id_port" value={{ port.port }}>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group  modal-body">
+                                                    <label class="col-md-3 control-label">指定源IP：</label>
+                                                    <div class="col-md-9">
+                                                        <input type="text"  style="border-style:none;font-size:18px" readonly name="acceptip" id="id_acceptip" value={{ port.acceptip }}>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group  modal-body">
+                                                    <label class="col-md-3 control-label">用途：</label>
+                                                    <div class="col-md-9">
+                                                        <input type="text"  style="border-style:none;font-size:18px" readonly name="usage" id="id_usage" value={{ port.usage }}>
+                                                    </div>
+                                                    <input type="hidden" name="record_id" id="id_record_id" value={{ port.record_id }}>
+                                                </div>
+                                             <div class="modal-footer">
+                                                 <input  type="button" class="btn btn-default btn-sm" data-dismiss="modal" value="关闭">
+                                                 <input  type="submit" name="delete" href="{% url 'view_port' %}?ipaddr={{ port.ipaddr }}" class="btn btn-danger btn-sm" value="禁用">
+                                             </div>
+                                         </form>
+                                         </div>
+                                     </div><!-- /.modal-content -->
+                                </div><!-- /.modal -->
+
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td>暂无端口</td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                    <nav>
+                        <ul class="pager">
+                            {% if port_list.has_previous %}
+                                <li class="previous"><a
+                                        href="?ipaddr={{ query_ipaddr }}&page={{ port_list.previous_page_number }}">上一页</a>
+                                </li>
+                            {% else %}
+                                <li class="previous disabled"><a href="#">上一页</a></li>
+                            {% endif %}
+                            第 {{ port_list.number }} / {{ port_list.paginator.num_pages }}页
+                            {% if port_list.has_next %}
+                                <li class="next"><a
+                                        href="?ipaddr={{ query_ipaddr }}&page={{ port_list.next_page_number }}">下一页</a>
+                                </li>
+                            {% else %}
+                                <li class="next disabled"><a href="#">下一页</a></li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+{% endblock %}

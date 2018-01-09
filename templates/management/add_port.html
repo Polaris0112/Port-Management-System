@@ -53,9 +53,9 @@
                             <select name="ipaddr"  class="form-control">
  			    {% for host in host_list %}
                    {% if host.ipaddr == query_ipaddr %}
-			           <option selected  class="form-control" value={{ host.ipaddr}}>{{ host.ssh_name }} - {{ host.ipaddr }}</option>
+			           <option selected  class="form-control" value={{ host.ipaddr }}>{{ host.ssh_name }} - {{ host.ipaddr }}</option>
                    {% else %}
-			           <option class="form-control" value={{ host.ipaddr}}>{{ host.ssh_name }} - {{ host.ipaddr }}</option>
+			           <option class="form-control" value={{ host.ipaddr }}>{{ host.ssh_name }} - {{ host.ipaddr }}</option>
                    {% endif %}
 			    {% endfor %}
 			    </select>

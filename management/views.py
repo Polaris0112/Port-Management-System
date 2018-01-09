@@ -180,13 +180,13 @@ def add_port(request):
 
     if request.method == 'POST':
         get_ipaddr = request.POST.get('ipaddr', '')
+        get_ssh_name = request.POST.get('sshname', '')
         if request.POST.get('port', '') != '':
             get_port = request.POST.get('port', '')
         if request.POST.get('acceptip', '') != '':
             acceptip = request.POST.get('acceptip', '')
         get_usage = request.POST.get('usage', '')
         get_protocol = request.POST.get('protocol', '')
-        get_ssh_name = Host.objects.values('ssh_name').filter(ipaddr=get_ipaddr)[0]['ssh_name']
 
         if reg.match(get_ipaddr) and sub.match(acceptip):
             chgeip = request.POST.get('ipaddr', '').replace('.','')

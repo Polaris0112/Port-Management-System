@@ -11,12 +11,22 @@ Github 开源项目地址： https://github.com/Polaris0112/Port-Management-Syst
 该项目是基于Django编写的端口管理系统，可以通过Django后台更改密码。本管理系统包含了基础用户注册、登入登出功能，根据主机分类和根据端口分类的界面，提供增、删、改、查功能，通过页面管理导入或者导出csv进行批量添加和删除主机和端口信息，还有根据端口信息生成对应的iptables规则脚本。
 
 部分效果图如下：
-![index.png]()
-![view_hosts.png]()
-![view_ports.png]()
+
+### 主页
+
+![index.png](https://github.com/Polaris0112/Port-Management-System/blob/master/demonstration/index.png)
+
+### 主机信息查看页面
+
+![view_hosts.png](https://github.com/Polaris0112/Port-Management-System/blob/master/demonstration/view_hosts.png)
+
+### 端口信息查看页面
+
+![view_ports.png](https://github.com/Polaris0112/Port-Management-System/blob/master/demonstration/view_ports.png)
 
 
-更多效果图展示请按[这里]()
+
+更多效果图展示请按[这里](https://github.com/Polaris0112/Port-Management-System/tree/master/demonstration)
 
 
 
@@ -71,9 +81,9 @@ Running migrations:
 
 再查看数据库对应的表，会发现模板已经建好
 
--  *先创建Django超级管理员账号`python manage.py createsuperuser`，按提示输入即可，需要记住账号密码*
+-  **先创建Django超级管理员账号`python manage.py createsuperuser`，按提示输入即可，需要记住账号密码**
 
--  *登录入数据库，进入你所创建的库中，输入`insert into management_myuser (nickname,permission,user_id) values ("admin","3","1");`（假设你创建的管理员账号名为`admin`）*
+-  **登录入数据库，进入你所创建的库中，输入`insert into management_myuser (nickname,permission,user_id) values ("admin","3","1");`（假设你创建的管理员账号名为`admin`）**
 
 -  再运行`python manage.py runserver 0.0.0.0:10066`（端口可以自定义，只要不要用到已使用端口就可以），从浏览器访问对应http://ip:10066 ，就能看到登录界面，初始账号密码为上述两步所创建的。
 

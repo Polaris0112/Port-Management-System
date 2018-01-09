@@ -1,6 +1,10 @@
 #!/bin/bash
 # the script use for update all server port data
 
+set -e
+
+env_location="/xxx/xxx/env"
+
 group=$1
 if [ ! $group ];then
     echo -e "usage: sh update.sh [group-name or all]\n"
@@ -21,7 +25,7 @@ if [ "$group" = "all"];then
         sed -i "s/- hosts: .*$/- hosts: $gp/g" Fetch_files.yml 
         # run playbook
         sh $path/port_data/clean_dir.sh
-        $path/env/bin/ansible-playbook -i $hosts_file Fetch_files.yml 
+        env_location/bin/ansible-playbook -i $hosts_file Fetch_files.yml 
         sh $path/port_data/change_dir.sh
         for host in $(ls ${path}/port_data|grep -Ev ".sh")
         do
@@ -31,7 +35,7 @@ if [ "$group" = "all"];then
         done
         wait
         echo "Start to update mysql..."
-        $path/env/bin/python $path/db_update.py
+        $env_location/bin/python $path/db_update.py
         sh $path/port_data/clean_dir.sh
         echo "group $gp update done."
     done
@@ -42,7 +46,7 @@ else
         sed -i "s/- hosts: .*$/- hosts: $gp/g" Fetch_files.yml 
         # run playbook
         sh $path/port_data/clean_dir.sh
-        $path/env/bin/ansible-playbook -i $hosts_file Fetch_files.yml
+        env_location/bin/ansible-playbook -i $hosts_file Fetch_files.yml
         sh $path/port_data/change_dir.sh
         for host in $(ls ${path}/port_data|grep -Ev ".sh")
         do
@@ -52,7 +56,8 @@ else
         done
         wait
         echo "Start to update mysql..."
-        $path/env/bin/python $path/db_update.py
+        env_location/bin/python $path/db_update.py
         #sh $path/port_data/clean_dir.sh
         echo "group $gp update done."
     done
+fi

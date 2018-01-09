@@ -48,12 +48,12 @@ Github 开源项目地址： https://github.com/Polaris0112/Port-Management-Syst
 -  推荐：进入virtualenv，安装所需要的依赖包，`pip install  -r requirement.txt`
 
 -  需要对几个文件进行配置编辑：
-  - ./PM/setting.py  ：这个文件76行开始的json需要补充db相关信息，如数据库名，用户名和密码
-  - ./db_update.py  ：这个文件13-16行也是需要补充db信息如上
-  - ./update.sh  ：更改文件第6行，把对应路径换成目前正在使用的virtualenv的绝对路径
-  -  ./roles/fetch_files/tasks/main.yml   ：这个文件第10行`dest: "{ pwd }/port_data/"`其中的`{ pwd }`换成当前目录，也就是`dest:`的值是指向当前目录下的`port_data`文件夹
-  - ./external_hosts ：这个文件是按照ansible的格式来定义，`test`是组别名（可自定义），然后下面每一行的第一列是服务器的备注名（我一般是用ssh名来命名，不过可以自定义），第二列是`ansible_ssh_host=`后面是需要收集的服务器ip地址
-  - （需要域名访问才更改）./port_uWSGI.ini  ：这个文件第6行的`chdir`对应的路径改成当前文件夹路径，第10行的`home`对应的路径改成当前使用的env路径
+ - ./PM/setting.py  ：这个文件76行开始的json需要补充db相关信息，如数据库名，用户名和密码
+ - ./db_update.py  ：这个文件13-16行也是需要补充db信息如上
+ - ./update.sh  ：更改文件第6行，把对应路径换成目前正在使用的virtualenv的绝对路径
+ -  ./roles/fetch_files/tasks/main.yml   ：这个文件第10行`dest: "{ pwd }/port_data/"`其中的`{ pwd }`换成当前目录，也就是`dest:`的值是指向当前目录下的`port_data`文件夹
+ - ./external_hosts ：这个文件是按照ansible的格式来定义，`test`是组别名（可自定义），然后下面每一行的第一列是服务器的备注名（我一般是用ssh名来命名，不过可以自定义），第二列是`ansible_ssh_host=`后面是需要收集的服务器ip地址
+ - （需要域名访问才更改）./port_uWSGI.ini  ：这个文件第6行的`chdir`对应的路径改成当前文件夹路径，第10行的`home`对应的路径改成当前使用的env路径
 
 -  建立数据库模板，进入`Port-Management-System`文件夹，执行`python manage.py migrate`
 

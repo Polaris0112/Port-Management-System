@@ -32,30 +32,30 @@ Github 开源项目地址： https://github.com/Polaris0112/Port-Management-Syst
 
 ## 部署环境
 
--  python2.7.x
+- python2.7.x
 
--  mysql
+- mysql
 
--  nmap
+- nmap
 
 
 
 
 ## 安装部署
 
--  安装好mysql，确定数据库名、数据库用户名和数据库密码
+- 安装好mysql，确定数据库名、数据库用户名和数据库密码
 
--  推荐：进入virtualenv，安装所需要的依赖包，`pip install  -r requirement.txt`
+- 推荐：进入virtualenv，安装所需要的依赖包，`pip install  -r requirement.txt`
 
--  需要对几个文件进行配置编辑：
+- 需要对几个文件进行配置编辑：
  - ./PM/setting.py  ：这个文件76行开始的json需要补充db相关信息，如数据库名，用户名和密码
  - ./db_update.py  ：这个文件13-16行也是需要补充db信息如上
  - ./update.sh  ：更改文件第6行，把对应路径换成目前正在使用的virtualenv的绝对路径
- -  ./roles/fetch_files/tasks/main.yml   ：这个文件第10行`dest: "{ pwd }/port_data/"`其中的`{ pwd }`换成当前目录，也就是`dest:`的值是指向当前目录下的`port_data`文件夹
+ - ./roles/fetch_files/tasks/main.yml   ：这个文件第10行`dest: "{ pwd }/port_data/"`其中的`{ pwd }`换成当前目录，也就是`dest:`的值是指向当前目录下的`port_data`文件夹
  - ./external_hosts ：这个文件是按照ansible的格式来定义，`test`是组别名（可自定义），然后下面每一行的第一列是服务器的备注名（我一般是用ssh名来命名，不过可以自定义），第二列是`ansible_ssh_host=`后面是需要收集的服务器ip地址
  - （需要域名访问才更改）./port_uWSGI.ini  ：这个文件第6行的`chdir`对应的路径改成当前文件夹路径，第10行的`home`对应的路径改成当前使用的env路径
 
--  建立数据库模板，进入`Port-Management-System`文件夹，执行`python manage.py migrate`
+- 建立数据库模板，进入`Port-Management-System`文件夹，执行`python manage.py migrate`
 
 正常情况下出现的信息是：
 
@@ -97,10 +97,10 @@ Running migrations:
 ## 项目模块解释
 
 - PM：Django的容器，Port-Management缩写
-  -  ./PM/__init__.py： 一个空文件，告诉 Python 该目录是一个 Python 包。
-  -  ./PM/settings.py： 该 Django 项目的设置/配置。
-  -  ./PM/urls.py： 该 Django 项目的 URL 声明; 一份由 Django 驱动的网站"目录"。
-  -  ./PM/wsgi.py： 一个 WSGI 兼容的 Web 服务器的入口，以便运行你的项目。
+  - ./PM/__init__.py： 一个空文件，告诉 Python 该目录是一个 Python 包。
+  - ./PM/settings.py： 该 Django 项目的设置/配置。
+  - ./PM/urls.py： 该 Django 项目的 URL 声明; 一份由 Django 驱动的网站"目录"。
+  - ./PM/wsgi.py： 一个 WSGI 兼容的 Web 服务器的入口，以便运行你的项目。
 
 - management：Django的app内容，存放网页对应操作逻辑脚本
   - ./management/admin.py： 用户管理定义
@@ -126,27 +126,27 @@ Running migrations:
   - ./templates/management/export_csv.html：定义导出csv批量操作页面
 
 - rules：该目录是用于定义生成防火墙配置的固有规则
-  -  该目录下的文件，文件名以`external_hosts`中的组别名为名，里面以json形成，不能修改key的情况下填入对应的值。
+  - 该目录下的文件，文件名以`external_hosts`中的组别名为名，里面以json形成，不能修改key的情况下填入对应的值。
   
   （原意：是因为远程登录到服务器上取端口信息并不能获取到该端口允许哪些服务器发过来的包，如我只想我的zabbix客户端10050端口只收到某服务端发来的请求信息，那么我就可以在这里定义`acceptip`来批量设置指定组下服务器的统一规则。）
 
--  port_data：该目录是存放抓取到的端口信息（未整理）
+- port_data：该目录是存放抓取到的端口信息（未整理）
 
--  build_data：该目录是从`port_data`中获取数据源来规范化端口信息（已整理）
+- build_data：该目录是从`port_data`中获取数据源来规范化端口信息（已整理）
 
--  upload：接受上传的csv文件，这个是网页中的其中一个功能，批量处理相关
+- upload：接受上传的csv文件，这个是网页中的其中一个功能，批量处理相关
 
--  script-iptables：保存生成的iptables.sh文件
+- script-iptables：保存生成的iptables.sh文件
 
--  external_hosts：调用ansible时候使用的hosts文件，有关ansible的Inventory文件格式请看[这里](http://docs.ansible.com/ansible/latest/intro_inventory.html)
+- external_hosts：调用ansible时候使用的hosts文件，有关ansible的Inventory文件格式请看[这里](http://docs.ansible.com/ansible/latest/intro_inventory.html)
 
--  Fetch_files.yml：运行ansible使用的playbook
+- Fetch_files.yml：运行ansible使用的playbook
 
--  roles：该文件夹是运行playbook对应的roles逻辑
+- roles：该文件夹是运行playbook对应的roles逻辑
 
--  db_update.py：用于对`port_data`数据清洗，并对已处理的`build_data`中的数据进行入库
+- db_update.py：用于对`port_data`数据清洗，并对已处理的`build_data`中的数据进行入库
 
--  update.sh：用于简单调用的工具，一条命令更新对应的信息
+- update.sh：用于简单调用的工具，一条命令更新对应的信息
 
 
 ## 工具使用
